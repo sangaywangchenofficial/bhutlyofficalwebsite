@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "./navbar/page";
-import { Footer } from "./footer/page";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 const inter = Inter({
   variable: "--font-inter",

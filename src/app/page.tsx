@@ -12,8 +12,6 @@ import {
   Cpu
 } from 'lucide-react'
 
-import { Navbar } from './navbar/page'
-
 // ─── Reusable Animated Background ────────────────────────
 function AnimatedBackground({
   colors = ['#F9C81B', '#3b82f6', '#F9C81B'],
@@ -871,7 +869,6 @@ function CTA() {
 export default function Home() {
   return (
     <>
-      <Navbar />
       <main>
         <Hero />
         <Stats />

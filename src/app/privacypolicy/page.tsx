@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Shield, ArrowRight, CheckCircle } from 'lucide-react'
 
-import { Navbar } from '@/app/navbar/page'
 import { AnimatedBackground } from '@/animationbackground/page'
 
 // ─── Hero ──────────────────────────────────────────────────
@@ -661,7 +660,6 @@ function PrivacyCTA() {
 export default function PrivacyPage() {
     return (
         <>
-            <Navbar />
             <main>
                 <PrivacyHero />
                 <PrivacyContent />
