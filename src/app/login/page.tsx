@@ -5,13 +5,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
-    ArrowRight, Mail, Lock, Eye, EyeOff,
+    ArrowRight, User, Mail, Lock, Eye, EyeOff,
     CheckCircle, AlertCircle
 } from 'lucide-react'
-
-import { FaGithub, FaLinkedin, FaGoogle } from 'react-icons/fa'
+import { FaGoogle } from 'react-icons/fa'
+import { signIn } from "next-auth/react"
 
 import { AnimatedBackground } from '@/animationbackground/page'
+import { loginUserAction } from './login.action'
 
 // ─── Hero ──────────────────────────────────────────────────
 function LoginHero() {
@@ -53,6 +54,7 @@ function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [serverMessage, setServerMessage] = useState('')
 
     const validate = () => {
         const newErrors: Record<string, string> = {}
@@ -71,6 +73,7 @@ function LoginForm() {
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }))
         }
+        setServerMessage('')
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -82,30 +85,47 @@ function LoginForm() {
         }
 
         setStatus('loading')
+        setServerMessage('')
 
-        // Simulate login (replace with actual authentication)
         try {
-            // Simulate API call returning user role
-            const response = await new Promise<{ role: string }>((resolve) =>
-                setTimeout(() => resolve({ role: 'admin' }), 1500)
-            )
-            // In a real app, you'd receive the user role from the backend.
-            // For demo, we'll mock a role based on email (just for demonstration)
-            // You can replace with actual backend response.
-            const userRole = formData.email.includes('admin') ? 'admin' : 'editor'
+            const result = await loginUserAction({
+                email: formData.email,
+                password: formData.password,
+            })
 
-            setStatus('success')
-
-            // Redirect after a short delay
-            setTimeout(() => {
-                if (userRole === 'admin') {
-                    router.push('/admin')
-                } else {
-                    router.push('/editor')
-                }
-            }, 1000)
-
+            if (result.success) {
+                setStatus('success')
+                setTimeout(() => {
+                    router.push('/admindashboard')
+                }, 1000)
+            } else {
+                setStatus('error')
+                setServerMessage(result.message || 'Invalid email or password. Please try again.')
+                setTimeout(() => setStatus('idle'), 5000)
+            }
         } catch {
+            setStatus('error')
+            setServerMessage('Something went wrong. Please try again later.')
+            setTimeout(() => setStatus('idle'), 5000)
+        }
+    }
+
+    const handleGoogleSignIn = async () => {
+        try {
+            const result = await signIn('google', {
+                redirect: false,
+                callbackUrl: '/admindashboard'
+            })
+
+            if (!result?.error) {
+                router.push('/admindashboard')
+            } else {
+                setServerMessage('Google sign-in failed. Please try again.')
+                setStatus('error')
+                setTimeout(() => setStatus('idle'), 5000)
+            }
+        } catch {
+            setServerMessage('Something went wrong with Google sign-in.')
             setStatus('error')
             setTimeout(() => setStatus('idle'), 5000)
         }
@@ -139,7 +159,7 @@ function LoginForm() {
                             className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-3"
                         >
                             <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                            <span>Invalid email or password. Please try again.</span>
+                            <span>{serverMessage}</span>
                         </motion.div>
                     )}
 
@@ -247,20 +267,17 @@ function LoginForm() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                        <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors">
-                            <FaGithub className="h-5 w-5 text-white/60" />
-                            <span className="text-xs text-white/60">GitHub</span>
-                        </button>
-                        <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors">
-                            <FaLinkedin className="h-5 w-5 text-white/60" />
-                            <span className="text-xs text-white/60">LinkedIn</span>
-                        </button>
-                        <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors">
+                    <div className="flex justify-center">
+                        <button
+                            type="button"
+                            onClick={handleGoogleSignIn}
+                            className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors"
+                        >
                             <FaGoogle className="h-5 w-5 text-white/60" />
                             <span className="text-xs text-white/60">Google</span>
                         </button>
                     </div>
+
                 </motion.div>
             </div>
         </section>

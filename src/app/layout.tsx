@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
+import { LayoutWrapper } from "@/components/layout-wrapper";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -65,10 +65,9 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <script
-          dangerouslySetInnerHTML={{ __html: themeScript }}
-          suppressHydrationWarning
-        />
+        <Script id="theme-script" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -82,13 +81,9 @@ export default function RootLayout({
           Skip to content
         </a>
 
-        <Navbar />
-
-        <main id="main-content" className="flex-1">
+        <LayoutWrapper>
           {children}
-        </main>
-
-        <Footer />
+        </LayoutWrapper>
       </body>
     </html>
   );

@@ -2,16 +2,17 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'  // 👈 for redirect
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
     ArrowRight, User, Mail, Lock, Eye, EyeOff,
-    CheckCircle, AlertCircle, Sparkles, Shield, Users
+    CheckCircle, AlertCircle
 } from 'lucide-react'
-
-import { FaGithub, FaLinkedin, FaGoogle } from 'react-icons/fa'
+import { FaGoogle } from 'react-icons/fa'
+import { signIn } from "next-auth/react"
 
 import { AnimatedBackground } from '@/animationbackground/page'
+import { registerUserAction } from '@/app/register/registration.action'
 
 // ─── Password Strength Indicator ──────────────────────────
 function PasswordStrength({ password }: { password: string }) {
@@ -41,7 +42,8 @@ function PasswordStrength({ password }: { password: string }) {
                     />
                 ))}
             </div>
-            <p className={`text-xs mt-1 ${strength > 0 ? colors[strength - 1].replace('bg-', 'text-') : 'text-white/30'}`}>
+            <p className={`text-xs mt-1 ${strength > 0 ? colors[strength - 1].replace('bg-', 'text-') : 'text-white/30'
+                }`}>
                 {strength > 0 ? labels[strength - 1] : 'Enter a password'}
             </p>
         </div>
@@ -78,20 +80,21 @@ function RegisterHero() {
 
 // ─── Registration Form ─────────────────────────────────────
 function RegisterForm() {
-    const router = useRouter()  // 👈 for redirect
+    const router = useRouter()
 
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'editor', // 👈 new field: 'admin' or 'editor'
+        role: 'editor',
         terms: false,
     })
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [serverMessage, setServerMessage] = useState('')
 
     const validate = () => {
         const newErrors: Record<string, string> = {}
@@ -115,6 +118,7 @@ function RegisterForm() {
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }))
         }
+        setServerMessage('')
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -126,28 +130,27 @@ function RegisterForm() {
         }
 
         setStatus('loading')
+        setServerMessage('')
 
-        // Simulate registration (replace with actual API call)
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+        const result = await registerUserAction({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role as 'admin' | 'editor',
+        })
+
+        if (result.success) {
             setStatus('success')
-
-            // 👇 Auto-login simulation – store role or token
-            // In real app, you would receive a token and role from backend
-            const userRole = formData.role // 'admin' or 'editor'
-
-            // Redirect to appropriate dashboard after a short delay
+            // 👇 Redirect to login page after a short delay
             setTimeout(() => {
-                if (userRole === 'admin') {
-                    router.push('/admin')      // 👈 change to your admin route
-                } else {
-                    router.push('/editor')     // 👈 change to your editor route
-                }
-            }, 1000)
-
-        } catch {
+                router.push('/login')
+            }, 1500)
+        } else {
             setStatus('error')
-            setTimeout(() => setStatus('idle'), 5000)
+            setServerMessage(result.message || 'Registration failed. Please try again.')
+            setTimeout(() => {
+                setStatus('idle')
+            }, 5000)
         }
     }
 
@@ -168,7 +171,7 @@ function RegisterForm() {
                             className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center gap-3"
                         >
                             <CheckCircle className="h-5 w-5 flex-shrink-0" />
-                            <span>Account created! Redirecting to your dashboard...</span>
+                            <span>Account created! Redirecting to login...</span>
                         </motion.div>
                     )}
 
@@ -179,11 +182,12 @@ function RegisterForm() {
                             className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-3"
                         >
                             <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                            <span>Registration failed. Please try again.</span>
+                            <span>{serverMessage}</span>
                         </motion.div>
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Full Name */}
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-white/60 mb-1.5">
                                 Full Name *
@@ -204,6 +208,7 @@ function RegisterForm() {
                             {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
                         </div>
 
+                        {/* Email */}
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-white/60 mb-1.5">
                                 Email Address *
@@ -224,6 +229,7 @@ function RegisterForm() {
                             {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
                         </div>
 
+                        {/* Password */}
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-white/60 mb-1.5">
                                 Password *
@@ -252,6 +258,7 @@ function RegisterForm() {
                             {errors.password && <p className="mt-1 text-sm text-red-400">{errors.password}</p>}
                         </div>
 
+                        {/* Confirm Password */}
                         <div>
                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-white/60 mb-1.5">
                                 Confirm Password *
@@ -279,12 +286,12 @@ function RegisterForm() {
                             {errors.confirmPassword && <p className="mt-1 text-sm text-red-400">{errors.confirmPassword}</p>}
                         </div>
 
-                        {/* 👇 NEW: Role Selection */}
-                        <div className="text-center"> {/* 👈 Added text-center to container */}
+                        {/* Role Selection */}
+                        <div className="text-center">
                             <label className="block text-sm font-medium text-white/60 mb-1.5">
                                 Select Role *
                             </label>
-                            <div className="flex gap-6 justify-center"> {/* 👈 Added justify-center */}
+                            <div className="flex gap-6 justify-center">
                                 <label className="flex items-center gap-2 text-white/80 cursor-pointer">
                                     <input
                                         type="radio"
@@ -311,6 +318,7 @@ function RegisterForm() {
                             {errors.role && <p className="mt-1 text-sm text-red-400">{errors.role}</p>}
                         </div>
 
+                        {/* Terms */}
                         <div className="flex items-start gap-3">
                             <input
                                 type="checkbox"
@@ -322,11 +330,11 @@ function RegisterForm() {
                             />
                             <label htmlFor="terms" className="text-sm text-white/60">
                                 I agree to the{' '}
-                                <Link href="/terms" className="text-[#F9C81B] hover:underline">
+                                <Link href="/termofservice" className="text-[#F9C81B] hover:underline">
                                     Terms of Service
                                 </Link>
                                 {' '}and{' '}
-                                <Link href="/privacy" className="text-[#F9C81B] hover:underline">
+                                <Link href="/privacypolicy" className="text-[#F9C81B] hover:underline">
                                     Privacy Policy
                                 </Link>
                             </label>
@@ -370,20 +378,17 @@ function RegisterForm() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                        <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors">
-                            <FaGithub className="h-5 w-5 text-white/60" />
-                            <span className="text-xs text-white/60">GitHub</span>
-                        </button>
-                        <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors">
-                            <FaLinkedin className="h-5 w-5 text-white/60" />
-                            <span className="text-xs text-white/60">LinkedIn</span>
-                        </button>
-                        <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors">
+                    <div className="flex justify-center">
+                        <button 
+                            type="button"
+                            onClick={() => signIn("google", { callbackUrl: "/admindashboard" })}
+                            className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 transition-colors"
+                        >
                             <FaGoogle className="h-5 w-5 text-white/60" />
                             <span className="text-xs text-white/60">Google</span>
                         </button>
                     </div>
+
                 </motion.div>
             </div>
         </section>
@@ -393,11 +398,9 @@ function RegisterForm() {
 // ─── Main Page ────────────────────────────────────────────
 export default function RegisterPage() {
     return (
-        <>
-            <main>
-                <RegisterHero />
-                <RegisterForm />
-            </main>
-        </>
+        <main>
+            <RegisterHero />
+            <RegisterForm />
+        </main>
     )
 }

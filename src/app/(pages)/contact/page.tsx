@@ -4,14 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
-    ArrowRight, Mail, Phone, MapPin, Clock, Send,
-    CheckCircle, MessageSquare, User, AtSign, AlertCircle,
-    Sparkles, Compass, Rocket, Globe
+    Mail, Phone, MapPin, Clock, Send,
+    CheckCircle, MessageSquare, User, AtSign, AlertCircle, Rocket
 } from 'lucide-react'
 
-import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa'
+import { FaFacebook, FaLinkedin, FaInstagram, FaWhatsapp } from 'react-icons/fa'
 
 import { AnimatedBackground } from '@/animationbackground/page'
+import { sendMessage } from './contact.action'
 
 // ─── Hero ──────────────────────────────────────────────────
 function ContactHero() {
@@ -54,6 +54,7 @@ function ContactSection() {
     })
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [serverError, setServerError] = useState('')
 
     const validate = () => {
         const newErrors: Record<string, string> = {}
@@ -68,10 +69,10 @@ function ContactSection() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
         setFormData((prev) => ({ ...prev, [name]: value }))
-        // Clear error for that field
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }))
         }
+        setServerError('')
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -83,20 +84,33 @@ function ContactSection() {
         }
 
         setStatus('loading')
+        setServerError('')
 
-        // Simulate sending (replace with actual API call)
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-            setStatus('success')
-            setFormData({ name: '', email: '', subject: '', message: '' })
-            // Reset success after 5 seconds
-            setTimeout(() => setStatus('idle'), 5000)
+            const result = await sendMessage({
+                name: formData.name,
+                email: formData.email,
+                subject: formData.subject,
+                message: formData.message,
+            })
+
+            if (result.success) {
+                setStatus('success')
+                setFormData({ name: '', email: '', subject: '', message: '' })
+                setTimeout(() => setStatus('idle'), 5000)
+            } else {
+                setStatus('error')
+                setServerError(result.error || 'Failed to send message. Please try again.')
+                setTimeout(() => setStatus('idle'), 5000)
+            }
         } catch {
             setStatus('error')
+            setServerError('Something went wrong. Please try again later.')
             setTimeout(() => setStatus('idle'), 5000)
         }
     }
 
+    // ─── Clean Contact Information (no steps or descriptions) ──
     const contactInfo = [
         {
             icon: Mail,
@@ -109,6 +123,12 @@ function ContactSection() {
             label: 'Phone',
             value: '+975 17 123 456',
             href: 'tel:+97517123456',
+        },
+        {
+            icon: FaWhatsapp,
+            label: 'WhatsApp',
+            value: '+975 17 123 456',
+            href: 'https://wa.me/97517123456',
         },
         {
             icon: MapPin,
@@ -182,9 +202,9 @@ function ContactSection() {
                                 <Link
                                     href="#"
                                     className="text-white/40 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full hover:bg-white/10"
-                                    aria-label="GitHub"
+                                    aria-label="Facebook"
                                 >
-                                    <FaGithub className="h-5 w-5" />
+                                    <FaFacebook className="h-5 w-5" />
                                 </Link>
                                 <Link
                                     href="#"
@@ -200,11 +220,18 @@ function ContactSection() {
                                 >
                                     <FaInstagram className="h-5 w-5" />
                                 </Link>
+                                <Link
+                                    href="#"
+                                    className="text-white/40 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full hover:bg-white/10"
+                                    aria-label="Whatsapp"
+                                >
+                                    <FaWhatsapp className="h-5 w-5" />
+                                </Link>
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* Right Column: Contact Form */}
+                    {/* Right Column: Contact Form (unchanged) */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -232,7 +259,7 @@ function ContactSection() {
                                     className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-3"
                                 >
                                     <AlertCircle className="h-5 w-5" />
-                                    <span>Something went wrong. Please try again later.</span>
+                                    <span>{serverError || 'Something went wrong. Please try again.'}</span>
                                 </motion.div>
                             )}
 
@@ -356,15 +383,15 @@ function MapSection() {
                     viewport={{ once: true }}
                     className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm"
                 >
-                    {/* Placeholder for Google Maps or static map image */}
-                    <div className="relative aspect-[16/6] flex items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
-                        <div className="text-center">
-                            <MapPin className="h-12 w-12 text-[#F9C81B] mx-auto mb-2" />
-                            <p className="text-white/40 text-sm">Find us in Thimphu, Bhutan</p>
-                            <p className="text-white/20 text-xs mt-1">
-                                (Google Maps integration coming soon)
-                            </p>
-                        </div>
+                    <div className="relative aspect-[16/6] min-h-[300px] w-full">
+                        <iframe
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=89.55%2C27.35%2C89.75%2C27.55&layer=mapnik&marker=27.4728%2C89.6399"
+                            className="absolute inset-0 w-full h-full border-0"
+                            loading="lazy"
+                            allowFullScreen
+                            title="Bhutly office location in Thimphu, Bhutan"
+                            style={{ filter: 'invert(1) hue-rotate(180deg) brightness(0.9)' }}
+                        />
                     </div>
                 </motion.div>
             </div>
@@ -419,13 +446,11 @@ function ContactCTA() {
 // ─── Main Page ────────────────────────────────────────────
 export default function ContactPage() {
     return (
-        <>
-            <main>
-                <ContactHero />
-                <ContactSection />
-                <MapSection />
-                <ContactCTA />
-            </main>
-        </>
+        <main>
+            <ContactHero />
+            <ContactSection />
+            <MapSection />
+            <ContactCTA />
+        </main>
     )
 }

@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
     ArrowRight, Users, Target, Eye, Heart, Award,
-    Clock, CheckCircle, Rocket, Sparkles, Code
+    Clock, CheckCircle, Rocket, Sparkles, Code,
+    Lightbulb, Briefcase, GraduationCap, Leaf, BarChart, Shield
 } from 'lucide-react'
 
 import AnimatedBackground from '@/animationbackground/page'
@@ -103,6 +104,98 @@ function MissionVision() {
     )
 }
 
+// ─── Objectives ────────────────────────────────────────────
+function Objectives() {
+    const objectives = [
+        {
+            icon: Lightbulb,
+            title: 'Innovation First',
+            desc: 'We build creative, forward-thinking solutions that solve real problems.',
+            color: 'text-yellow-400',
+            bg: 'bg-yellow-500/10',
+        },
+        {
+            icon: Briefcase,
+            title: 'Empower Local Businesses',
+            desc: 'We help Bhutanese companies thrive with technology that fits their needs.',
+            color: 'text-blue-400',
+            bg: 'bg-blue-500/10',
+        },
+        {
+            icon: GraduationCap,
+            title: 'Foster Tech Talent',
+            desc: 'We mentor and develop the next generation of Bhutanese software engineers.',
+            color: 'text-purple-400',
+            bg: 'bg-purple-500/10',
+        },
+        {
+            icon: Leaf,
+            title: 'Sustainable Growth',
+            desc: 'We create lasting impact while respecting our environment and culture.',
+            color: 'text-emerald-400',
+            bg: 'bg-emerald-500/10',
+        },
+        {
+            icon: BarChart,
+            title: 'Measurable Impact',
+            desc: 'We track outcomes and ensure our solutions drive tangible results.',
+            color: 'text-orange-400',
+            bg: 'bg-orange-500/10',
+        },
+        {
+            icon: Shield,
+            title: 'Transparency',
+            desc: 'We communicate openly, honestly, and build trust with every client.',
+            color: 'text-cyan-400',
+            bg: 'bg-cyan-500/10',
+        },
+    ]
+
+    return (
+        <section className="relative overflow-hidden py-24 bg-[#0A0A0A] border-t border-white/5">
+            <AnimatedBackground particleCount={3} colors={['#F9C81B', '#3b82f6']} />
+            <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center max-w-3xl mx-auto"
+                >
+                    <span className="inline-block text-sm font-semibold text-[#F9C81B] uppercase tracking-wider">
+                        What We Aim For
+                    </span>
+                    <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-white">Our Objectives</h2>
+                    <p className="mt-4 text-white/50 text-balance">
+                        We are guided by clear goals that shape everything we do — from the products we
+                        build to the relationships we nurture.
+                    </p>
+                </motion.div>
+
+                <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {objectives.map((obj, idx) => (
+                        <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.08 }}
+                            className="group bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:border-[#F9C81B]/30 hover:scale-[1.02] transition-all duration-300"
+                        >
+                            <div className={`inline-flex rounded-xl ${obj.bg} p-3`}>
+                                <obj.icon className={`h-6 w-6 ${obj.color}`} />
+                            </div>
+                            <h3 className="mt-4 font-semibold text-white group-hover:text-[#F9C81B] transition-colors">
+                                {obj.title}
+                            </h3>
+                            <p className="mt-1 text-sm text-white/60">{obj.desc}</p>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )
+}
+
 // ─── Values ────────────────────────────────────────────────
 function Values() {
     const values = [
@@ -179,7 +272,6 @@ function Values() {
 
 // ─── Team ──────────────────────────────────────────────────
 function Team() {
-    // Replace with real team members
     const team = [
         {
             name: 'Sonam Dorji',
@@ -314,15 +406,14 @@ function AboutCTA() {
 // ─── Main Page ────────────────────────────────────────────
 export default function AboutPage() {
     return (
-        <>
-            <main>
-                <AboutHero />
-                <MissionVision />
-                <Values />
-                <Team />
-                <Stats />
-                <AboutCTA />
-            </main>
-        </>
+        <main>
+            <AboutHero />
+            <MissionVision />
+            <Objectives />
+            <Values />
+            <Team />
+            <Stats />
+            <AboutCTA />
+        </main>
     )
 }

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { FaFacebook, FaLinkedin, FaInstagram, FaWhatsapp, FaTelegram } from 'react-icons/fa'
+import { Building, Mail, MapPin, Phone } from 'lucide-react'
 import { AnimatedBackground } from '@/animationbackground/page';
 
 const quickLinks = [
@@ -17,7 +18,6 @@ export function Footer() {
             <AnimatedBackground particleCount={3} colors={['#F9C81B', '#F9C81B']} />
 
             <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-8">
-                {/* ... existing footer content ... */}
                 <div className="grid gap-10 md:grid-cols-4">
                     {/* Brand Column */}
                     <div className="md:col-span-1">
@@ -31,7 +31,7 @@ export function Footer() {
                             <Link
                                 href="#"
                                 className="text-white/40 hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10"
-                                aria-label="GitHub"
+                                aria-label="Facebook"
                             >
                                 <FaFacebook className="h-4 w-4" />
                             </Link>
@@ -52,7 +52,7 @@ export function Footer() {
                             <Link
                                 href="#"
                                 className="text-white/40 hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10"
-                                aria-label="Whatsapp"
+                                aria-label="WhatsApp"
                             >
                                 <FaWhatsapp className="h-4 w-4" />
                             </Link>
@@ -107,32 +107,35 @@ export function Footer() {
                                     Maintenance & Support
                                 </Link>
                             </li>
-
                         </ul>
                     </div>
 
-                    {/* Contact */}
+                    {/* Contact – now with proper icons */}
                     <div>
                         <h4 className="text-sm font-semibold text-white/60 uppercase tracking-wider">Contact</h4>
                         <ul className="mt-4 space-y-2.5 text-sm text-white/40">
                             <li className="flex items-center gap-2">
-                                <span>🏢</span>
+                                <Building className="h-4 w-4 text-white/30" />
                                 <span>
-                                    <Link href="/" className="hover:text-white transition-colors" aria-label="Bhutly">Bhutly</Link>
+                                    <Link href="/" className="hover:text-white transition-colors" aria-label="Bhutly">
+                                        Bhutly
+                                    </Link>
                                 </span>
                             </li>
                             <li className="flex items-center gap-2">
-                                <span>📧</span>
+                                <Mail className="h-4 w-4 text-white/30" />
                                 <a href="mailto:hello@bhutly.com" className="hover:text-white transition-colors">
                                     hello@bhutly.com
                                 </a>
                             </li>
-                            <li className="flex items-center gap-2">
-                                <span>📍</span>
-                                <span>Thimphu, Bhutan 🇧🇹</span>
+                            <li className="flex items-center gap-2 hover:text-white transition-colors">
+                                <MapPin className="h-4 w-4 text-white/30" />
+                                <a href="http://maps.app.goo.gl/QJ3zK93e2Y9wKk8Q6">
+                                    <span>Thimphu, Bhutan</span>
+                                </a>
                             </li>
-                            <li className="flex items-center gap-2">
-                                <span>📞</span>
+                            <li className="flex items-center gap-2 hover:text-white transition-colors">
+                                <Phone className="h-4 w-4 text-white/30" />
                                 <a href="tel:+97517123456" className="hover:text-white transition-colors">
                                     +975 17 123 456
                                 </a>
